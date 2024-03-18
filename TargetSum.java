@@ -1,96 +1,113 @@
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Scanner;
 
 class TargetSum{
-    public static void main(String[] args){
-        int[] array = {3, 4, 1, 5, 6, 7, 9, 11}; 
+    public static void main(String[] args) {
         
-        Arrays.sort(array);
+        //will hold user input of array
+        List <Integer> numbers = new ArrayList<>();
 
-        calculator(array, 5);
-
-
-    }
-
-    /*this method will recursively find all the combinations of the array, and if the current 
-        combination is equal to the target it will print it 
-    */
-    public static int[] calculator(int[] array, int target){
-        if(array.length == 0){
-            //if array is empty return empty array
-            int[] empty = new int[0];
-            return empty;
+        //will hold user input of target number 
+        int target = -1;
+        
+        //will catch inputMismatchException
+        try{
+            //create array of integers inputted by user 
+            numbers = userInputArray();
+        
+            //obtain target number from user 
+            target = userTargetNumber();
         }
 
-        //stores the first number of the current array
-        int firstNumber = array[0]; 
-        
-        int[] rest;
-        //rest will have a subset of the array from index = 1 to index = array.length-1
-        if(array.length == 1)
-            rest = Arrays.copyOf(array, 1);
-        else 
-            rest = Arrays.copyOfRange(array, 1, array.length-1);
-
-        //these are combinations without the first number 
-        int[] combWithoutFirst = calculator(rest, target);
-
-        //these are combinations with the first number
-        int[] combWithFirst = addNumber(array, firstNumber);
-
-        calculator(combWithFirst, target );
-
-        //if the sum of the array is equal to the target print in 
-        if (sum(array) == target){
-            printArray(array);
+        catch(InputMismatchException e){
+            System.out.println("Invalid input, please be sure to only enter integers.");
         }
 
-        //just to return something 
-        return combWithoutFirst;
+        //create list of combinations using method that will find all combinations 
+        List<List<Integer>> combinations = findCombinations(numbers);
+        
+        //print all combinations of the list that add to the target number 
+        printAllCombinations(combinations, target);
+        
     }
 
-    //this method returns sum of all the numbers in an array 
-    public static int sum (int[] array){
-        int sum = 0; 
+    //return target number 
+    public static int userTargetNumber(){
+        //create scanner 
+        Scanner input = new Scanner(System.in);
+
+        System.out.print("Please enter the target number: ");
         
-        for (int i = 0; i < array.length; i++){
-            sum += array[i];
+        int target = input.nextInt();
+
+        return target;
+    }
+    //method will return user input array of integers 
+    public static List<Integer> userInputArray() {
+          //create the array of numbers
+          List<Integer> numbers = new ArrayList<>();
+
+          //Create scanner for user input 
+          Scanner input = new Scanner(System.in);
+  
+          System.out.print("Please enter the number of integers in the array you will input: ");
+         
+          //will store the amount of numbers the user will store 
+          int length = input.nextInt();
+  
+          System.out.print("\nPlease enter the numbers: ");
+          //will store each number to array
+          for(int i = 0; i < length; i++){
+              numbers.add(input.nextInt());
+          }
+
+          return numbers;
+    }
+
+    //This code returns a list of a list of all the possible combinations of a given array 
+    public static List<List<Integer>> findCombinations(List<Integer> array) {
+       
+        //this is the base case, if the array is empty it will return a list of list of integers which is empty  
+        if (array.size() == 0) {
+            List<List<Integer>> result = new ArrayList<>();
+            result.add(new ArrayList<>());
+            return result;
         }
 
-        return sum; 
+        //This list will store combinations 
+        List<List<Integer>> combinations = new ArrayList<>();
+
+        /*for each recursive call it will remove the first number of the array, which will subsequently 
+        lead to the base case */
+        for (List<Integer> combination : findCombinations(array.subList(1, array.size()))) {
+            combinations.add(combination);
+            List<Integer> newCombination = new ArrayList<>(combination);
+            newCombination.add(array.get(0));
+            combinations.add(newCombination);
+        }
+        return combinations;
     }
 
-    //this method adds a number to the end of the array 
-    public static int[] addNumber(int[] array, int number){
-        int newArrayLength = array.length+1;
-
-        int[] newArray = new int[newArrayLength];
+    /*method will take in list of combinations, as well as the target number, will print all combinations of 
+    the array that add to the target number*/
+    public static void printAllCombinations(List<List<Integer>> combinations, int target){
+        //Print out display 
+        System.out.println("All of the combinations of array that add to " + target + "... ");
         
-        for(int i = 0; i<newArray.length; i++){
-            if( i != newArray.length-1){
-                newArray[i] = array[i];
+        /*This will cycle through the list of list of combinations, if the number is equal to the target 
+            it will print the array of integers
+        */
+        for(List<Integer> list:  combinations){
+            int sum = 0; 
+            for(int i = 0; i < list.size(); i++){
+                sum += list.get(i);
             }
 
-            else 
-                newArray[i] = number;
+            if (sum == target){
+                System.out.println(list);
+            }
         }
-
-        return newArray;
     }
-
-    //method to print all of the elements in an array
-    public static void printArray(int[] array){
-        //print opening bracket 
-        System.out.print("[");
-
-        //cycle through and print out all of the elements in an array 
-        for(int i = 0; i < array.length; i++){
-            if(i != array.length-1)
-                System.out.print(array[i] + " ");
-            else 
-                System.out.print(array[i]);
-        }
-        //print a closing bracket 
-        System.out.print("]");
-    }
-
 }
